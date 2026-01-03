@@ -2,6 +2,7 @@ uniform float uTime;
 uniform float uScrollProgress;
 varying vec2 vUv;
 varying vec3 vPosition;
+varying vec3 vNormal;
 
 // Noise function for organic distortion
 vec3 mod289(vec3 x) {
@@ -99,6 +100,7 @@ void main() {
   pos += normal * (distortion + scrollInfluence);
   
   vPosition = pos;
+  vNormal = normalize(normalMatrix * normal);
   
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
