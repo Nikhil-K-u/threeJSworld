@@ -27,21 +27,19 @@ void main() {
   // Calculate view direction for proper Fresnel
   vec3 viewDirection = normalize(cameraPosition - vPosition);
   
-  // Proper Fresnel equation for iridescent 'oil slick' effect
-  float fresnel = pow(1.0 - dot(normalize(vNormal), viewDirection), 3.0);
+  // High-end Fresnel equation with power of 4.0 for sharper rim light
+  float fresnel = pow(1.0 - dot(normalize(vNormal), viewDirection), 4.0);
   
-  // Create iridescent colors based on Fresnel at edges
-  vec3 iridescent = vec3(
-    sin(fresnel * TWO_PI + uTime * 0.5) * 0.5 + 0.5,
-    sin(fresnel * TWO_PI + uTime * 0.7 + 2.0) * 0.5 + 0.5,
-    sin(fresnel * TWO_PI + uTime * 0.3 + 4.0) * 0.5 + 0.5
-  );
+  // Create bright cyan/white rim light color for Active Theory polish
+  vec3 rimLightColor = vec3(0.5, 1.0, 1.0); // Cyan
+  vec3 whiteGlow = vec3(1.0, 1.0, 1.0); // White
+  vec3 rimColor = mix(rimLightColor, whiteGlow, fresnel * 0.5);
   
-  // Apply iridescent effect at edges
-  finalColor = mix(finalColor, iridescent, fresnel * 0.6);
+  // Apply bright rim light to edges
+  finalColor = mix(finalColor, rimColor, fresnel * 0.8);
   
-  // Add edge glow with Fresnel (bloom-like effect)
-  finalColor += fresnel * 0.4;
+  // Add strong edge glow for bloom effect
+  finalColor += fresnel * rimColor * 0.6;
   
   // Boost brightness for bloom effect on bright areas (branchless)
   float brightness = dot(finalColor, vec3(0.299, 0.587, 0.114));

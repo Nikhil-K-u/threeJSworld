@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger)
 
 function App() {
   const meshRef = useRef()
-  const [scrollProgress, setScrollProgress] = useState(0)
+  const scrollRef = useRef(0)
   const lenisRef = useRef(null)
   const rafFunctionRef = useRef(null)
 
@@ -32,16 +32,6 @@ function App() {
 
     // Disable lag smoothing for more accurate sync
     gsap.ticker.lagSmoothing(0)
-
-    // Track scroll progress
-    const handleScroll = () => {
-      const scrolled = window.scrollY
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-      const progress = Math.min(scrolled / maxScroll, 1)
-      setScrollProgress(progress)
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
 
     // GSAP ScrollTrigger animations
     const sections = document.querySelectorAll('.content section')
@@ -70,7 +60,7 @@ function App() {
     })
 
     // Create a proxy object for 3D mesh animation
-    const proxy = { rotationY: 0, rotationX: 0, positionY: 0, positionZ: 5 }
+    const proxy = { rotationY: 0, rotationX: 0, positionY: 0, positionZ: 0 }
 
     // Animate mesh rotation and position based on scroll
     ScrollTrigger.create({
@@ -81,13 +71,16 @@ function App() {
       onUpdate: (self) => {
         const progress = self.progress
         
+        // Update scroll ref for shader
+        scrollRef.current = progress
+        
         // Smooth rotation
         proxy.rotationY = progress * Math.PI * 2
         proxy.rotationX = Math.sin(progress * Math.PI) * 0.3
         
-        // Smooth position changes
+        // Smooth position changes - mesh moves from Z=0 to Z=2 (camera at Z=5)
         proxy.positionY = Math.sin(progress * Math.PI * 2) * 0.5
-        proxy.positionZ = 5 - progress * 1
+        proxy.positionZ = progress * 2
         
         // Apply to mesh if available
         if (meshRef.current) {
@@ -109,7 +102,6 @@ function App() {
     })
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
       ScrollTrigger.getAll().forEach(trigger => trigger.kill())
       if (lenisRef.current) {
         lenisRef.current.destroy()
@@ -123,7 +115,7 @@ function App() {
   return (
     <div className="App">
       {/* Fixed 3D Canvas */}
-      <Scene scrollProgress={scrollProgress} meshRef={meshRef} />
+      <Scene scrollRef={scrollRef} meshRef={meshRef} />
 
       {/* Scrollable HTML content overlay */}
       <div className="content">

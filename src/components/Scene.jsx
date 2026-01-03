@@ -1,13 +1,20 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
+import { EffectComposer, Bloom, Noise } from '@react-three/postprocessing'
 import LiquidMesh from './LiquidMesh'
 import Loader from './Loader'
 import ResponsiveCamera from './ResponsiveCamera'
 
-export default function Scene({ scrollProgress, meshRef }) {
+export default function Scene({ scrollRef, meshRef }) {
   return (
     <Canvas
       className="canvas-container"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 0
+      }}
       gl={{
         antialias: true,
         alpha: true,
@@ -25,8 +32,18 @@ export default function Scene({ scrollProgress, meshRef }) {
       
       {/* Main 3D content with Suspense loader and integrated post-processing effects */}
       <Suspense fallback={<Loader />}>
-        <LiquidMesh scrollProgress={scrollProgress} ref={meshRef} />
+        <LiquidMesh scrollRef={scrollRef} ref={meshRef} />
       </Suspense>
+      
+      {/* Post-processing effects for cinematic look */}
+      <EffectComposer>
+        <Bloom
+          intensity={1.2}
+          luminanceThreshold={0.5}
+          luminanceSmoothing={0.9}
+        />
+        <Noise opacity={0.03} />
+      </EffectComposer>
     </Canvas>
   )
 }

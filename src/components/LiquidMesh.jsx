@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import vertexShader from '../shaders/liquidVertex.glsl?raw'
 import fragmentShader from '../shaders/liquidFragment.glsl?raw'
 
-const LiquidMesh = forwardRef(({ scrollProgress }, ref) => {
+const LiquidMesh = forwardRef(({ scrollRef }, ref) => {
   const meshRef = ref || useRef()
   const materialRef = useRef()
   const mouseGroupRef = useRef()
@@ -25,29 +25,30 @@ const LiquidMesh = forwardRef(({ scrollProgress }, ref) => {
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
-      materialRef.current.uniforms.uScrollProgress.value = scrollProgress
+      // Read scrollRef.current to prevent re-renders
+      materialRef.current.uniforms.uScrollProgress.value = scrollRef.current
     }
 
-    // Mouse-follow effect with heavy lag using lerp (independent of scroll rotation)
+    // Mouse-follow effect with heavy lag using lerp (factor 0.1 for magnetic parallax)
     if (mouseGroupRef.current) {
       // Get mouse coordinates from state (-1 to 1)
       const mouseX = state.mouse.x
       const mouseY = state.mouse.y
 
-      // Target rotation based on mouse position
-      const targetRotationY = mouseX * 0.3
-      const targetRotationX = -mouseY * 0.3
+      // Target rotation based on mouse position (magnetic effect)
+      const targetRotationY = mouseX * 0.5
+      const targetRotationX = -mouseY * 0.5
 
-      // Apply heavy lag effect using lerp (0.02 = very slow, heavy lag)
+      // Apply heavy, satisfying lag using lerp (0.1 = heavy magnetic feel)
       mouseGroupRef.current.rotation.x = THREE.MathUtils.lerp(
         mouseGroupRef.current.rotation.x,
         targetRotationX,
-        0.02
+        0.1
       )
       mouseGroupRef.current.rotation.y = THREE.MathUtils.lerp(
         mouseGroupRef.current.rotation.y,
         targetRotationY,
-        0.02
+        0.1
       )
     }
   })
