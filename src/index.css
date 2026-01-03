@@ -217,13 +217,6 @@ body {
   opacity: 0.8;
 }
 
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.95rem;
-  opacity: 0.8;
-}
-
 .hero-highlights {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
