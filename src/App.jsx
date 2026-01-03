@@ -98,7 +98,6 @@ function App() {
 
       // Simple animations removed - content is now always visible
       // This prevents animation conflicts that cause mesh vanishing/exploding
-      const sections = document.querySelectorAll('.content section')
       
       // Keep only the hero heading animation for visual appeal
       const heroSection = document.querySelector('.hero')
