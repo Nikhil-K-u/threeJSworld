@@ -96,150 +96,33 @@ function App() {
       // Disable lag smoothing for more accurate sync
       gsap.ticker.lagSmoothing(0)
 
-      // Advanced scroll animations for sections with "coming and going" flow
+      // Simple animations removed - content is now always visible
+      // This prevents animation conflicts that cause mesh vanishing/exploding
       const sections = document.querySelectorAll('.content section')
-
-      sections.forEach((section, index) => {
-        const sectionContent = section.querySelector('.section-content')
-        const heading = section.querySelector('h1, h2')
-        const paragraphs = section.querySelectorAll('p')
-        const listItems = section.querySelectorAll('li')
-        const cards = section.querySelectorAll('.experience-item, .stat-card')
-        const isProjectSection = section.querySelector('.project')
-
-        // Create timeline for this section with proper reversing
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 80%',
-            end: 'bottom 20%',
-            toggleActions: 'play reverse play reverse',
-            onEnter: () => {
-              // Activate particle mode for projects section
-              if (isProjectSection) {
-                setParticleMode(1)
-              }
-            },
-            onLeave: () => {
-              if (isProjectSection) {
-                setParticleMode(0)
-              }
-            },
-            onEnterBack: () => {
-              if (isProjectSection) {
-                setParticleMode(1)
-              }
-            },
-            onLeaveBack: () => {
-              if (isProjectSection) {
-                setParticleMode(0)
-              }
-            }
-          }
-        })
-
-        // Section entrance animation
-        tl.fromTo(
-          sectionContent,
-          { 
-            opacity: 0,
-            y: 60
-          },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: 'power3.out'
-          },
-          0
-        )
-
-        // Heading character reveal animation
+      
+      // Keep only the hero heading animation for visual appeal
+      const heroSection = document.querySelector('.hero')
+      if (heroSection) {
+        const heading = heroSection.querySelector('h1')
         if (heading) {
           const chars = splitTextIntoChars(heading)
-          tl.fromTo(
+          gsap.fromTo(
             chars,
             {
               opacity: 0,
-              y: 30,
-              rotateX: -90
+              y: 30
             },
             {
               opacity: 1,
               y: 0,
-              rotateX: 0,
               duration: 0.6,
               stagger: 0.02,
-              ease: 'back.out(1.7)'
-            },
-            0.1
+              ease: 'power2.out',
+              delay: 0.3
+            }
           )
         }
-
-        // Paragraphs word reveal
-        paragraphs.forEach((p, pIndex) => {
-          const words = splitTextIntoWords(p)
-          tl.fromTo(
-            words,
-            {
-              opacity: 0,
-              y: 20,
-              filter: 'blur(4px)'
-            },
-            {
-              opacity: 1,
-              y: 0,
-              filter: 'blur(0px)',
-              duration: 0.5,
-              stagger: 0.03,
-              ease: 'power2.out'
-            },
-            0.3 + pIndex * 0.1
-          )
-        })
-
-        // List items stagger
-        if (listItems.length > 0) {
-          tl.fromTo(
-            listItems,
-            {
-              opacity: 0,
-              x: -30,
-              filter: 'blur(3px)'
-            },
-            {
-              opacity: 1,
-              x: 0,
-              filter: 'blur(0px)',
-              duration: 0.5,
-              stagger: 0.05,
-              ease: 'power2.out'
-            },
-            0.4
-          )
-        }
-
-        // Cards stagger
-        if (cards.length > 0) {
-          tl.fromTo(
-            cards,
-            {
-              opacity: 0,
-              y: 40,
-              scale: 0.95
-            },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.6,
-              stagger: 0.1,
-              ease: 'power3.out'
-            },
-            0.3
-          )
-        }
-      })
+      }
 
       // Initialize quick setters once mesh is available (outside the scroll loop)
       const initQuickSetters = () => {
