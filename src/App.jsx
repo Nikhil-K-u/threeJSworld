@@ -20,7 +20,8 @@ function splitTextIntoChars(element) {
     const span = document.createElement('span')
     span.textContent = char === ' ' ? NON_BREAKING_SPACE : char
     span.style.display = 'inline-block'
-    span.style.opacity = '0'
+    // Start visible - will be animated by GSAP from this state
+    span.style.opacity = '1'
     span.className = 'split-char'
     element.appendChild(span)
     return span
@@ -37,7 +38,8 @@ function splitTextIntoWords(element) {
     const span = document.createElement('span')
     span.textContent = word
     span.style.display = 'inline-block'
-    span.style.opacity = '0'
+    // Start visible - will be animated by GSAP from this state
+    span.style.opacity = '1'
     span.className = 'split-word'
     if (i < words.length - 1) {
       const space = document.createElement('span')
@@ -266,7 +268,9 @@ function App() {
           const rotationY = progress * Math.PI * 2
           const rotationX = Math.sin(progress * Math.PI) * 0.3
           const positionY = Math.sin(progress * Math.PI * 2) * 0.5
-          const positionZ = progress * 2
+          // Move mesh BACKWARD (away from camera) instead of forward to prevent clipping
+          // Camera is at z=5, mesh starts at z=0, so moving negative keeps it in view
+          const positionZ = -(progress * 1.5)
           
           // Apply using quick setters if initialized
           if (quickSettersRef.current.initialized) {

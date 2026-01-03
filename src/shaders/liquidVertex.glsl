@@ -108,11 +108,17 @@ void main() {
   float octave2 = baseNoise * 0.5 * sin(pos.y * 1.5 + uTime * 0.2);
   float octave3 = baseNoise * 0.3 * cos(pos.z * 2.0 + uTime * 0.25);
   
-  // Combine for organic movement
+  // Combine for organic movement with bounds to prevent explosion
   float distortion = (octave1 + octave2 + octave3) * 0.15;
   
-  // Add scroll-based deformation
+  // Clamp distortion to safe range to prevent vertex explosion
+  distortion = clamp(distortion, -0.3, 0.3);
+  
+  // Add scroll-based deformation with bounded influence
   float scrollInfluence = sin(pos.y * 3.0 + uScrollProgress * 3.14159) * 0.1;
+  
+  // Clamp scroll influence to prevent extreme values
+  scrollInfluence = clamp(scrollInfluence, -0.2, 0.2);
   
   // Magnetic vertex distortion - vertices bulge away from mouse position
   vec3 worldPos = (modelMatrix * vec4(pos, 1.0)).xyz;
@@ -125,12 +131,24 @@ void main() {
   float springFalloff = smoothstep(magneticRadius, 0.0, mouseDistance);
   float springForce = springFalloff * springFalloff * magneticStrength * uMouseInfluence;
   
+  // Clamp spring force to prevent extreme displacement
+  springForce = clamp(springForce, 0.0, 0.5);
+  
   // Push vertices away from mouse (bulge effect) with proper zero-length check
   vec3 pushDirection = mouseDistance > 0.001 ? normalize(toMouse) : vec3(0.0, 1.0, 0.0);
   vec3 magneticDisplacement = pushDirection * springForce;
   
+  // Apply distortions with final safety clamp
   pos += normal * (distortion + scrollInfluence);
   pos += magneticDisplacement;
+  
+  // Final safety check: clamp total displacement to prevent mesh explosion
+  // If any component exceeds reasonable bounds, scale it back
+  float maxDisplacement = 2.0;
+  if (length(pos - position) > maxDisplacement) {
+    vec3 displacement = pos - position;
+    pos = position + normalize(displacement) * maxDisplacement;
+  }
   
   vPosition = pos;
   vNormal = normalize(normalMatrix * normal);
