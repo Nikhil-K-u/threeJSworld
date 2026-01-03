@@ -1,16 +1,63 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import Scene from './components/Scene'
+import CustomCursor from './components/CustomCursor'
 
 gsap.registerPlugin(ScrollTrigger)
+
+// Non-breaking space character for text splitting
+const NON_BREAKING_SPACE = '\u00A0'
+
+// Helper function to split text into characters for animation
+function splitTextIntoChars(element) {
+  const text = element.textContent
+  element.innerHTML = ''
+  const chars = text.split('')
+  
+  return chars.map((char, i) => {
+    const span = document.createElement('span')
+    span.textContent = char === ' ' ? NON_BREAKING_SPACE : char
+    span.style.display = 'inline-block'
+    span.style.opacity = '0'
+    span.className = 'split-char'
+    element.appendChild(span)
+    return span
+  })
+}
+
+// Helper function to split text into words for animation
+function splitTextIntoWords(element) {
+  const text = element.textContent
+  element.innerHTML = ''
+  const words = text.split(' ')
+  
+  return words.map((word, i) => {
+    const span = document.createElement('span')
+    span.textContent = word
+    span.style.display = 'inline-block'
+    span.style.opacity = '0'
+    span.className = 'split-word'
+    if (i < words.length - 1) {
+      const space = document.createElement('span')
+      space.innerHTML = '&nbsp;'
+      space.style.display = 'inline-block'
+      element.appendChild(span)
+      element.appendChild(space)
+    } else {
+      element.appendChild(span)
+    }
+    return span
+  })
+}
 
 function App() {
   const meshRef = useRef()
   const scrollRef = useRef(0)
   const lenisRef = useRef(null)
   const rafFunctionRef = useRef(null)
+  const [particleMode, setParticleMode] = useState(0)
 
   useEffect(() => {
     // Initialize Lenis smooth scroll
@@ -33,30 +80,169 @@ function App() {
     // Disable lag smoothing for more accurate sync
     gsap.ticker.lagSmoothing(0)
 
-    // GSAP ScrollTrigger animations
+    // Advanced scroll animations for sections
     const sections = document.querySelectorAll('.content section')
 
     sections.forEach((section, index) => {
-      // Fade in sections
-      gsap.fromTo(
-        section,
+      const sectionContent = section.querySelector('.section-content')
+      const heading = section.querySelector('h1, h2')
+      const paragraphs = section.querySelectorAll('p')
+      const listItems = section.querySelectorAll('li')
+      const cards = section.querySelectorAll('.experience-item, .stat-card')
+      const isProjectSection = section.querySelector('.project')
+
+      // Create timeline for this section
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 80%',
+          end: 'bottom 20%',
+          toggleActions: 'play reverse play reverse',
+          onEnter: () => {
+            // Activate particle mode for projects section
+            if (isProjectSection) {
+              setParticleMode(1)
+            }
+          },
+          onLeave: () => {
+            if (isProjectSection) {
+              setParticleMode(0)
+            }
+          },
+          onEnterBack: () => {
+            if (isProjectSection) {
+              setParticleMode(1)
+            }
+          },
+          onLeaveBack: () => {
+            if (isProjectSection) {
+              setParticleMode(0)
+            }
+          }
+        }
+      })
+
+      // Section fade in
+      tl.fromTo(
+        sectionContent,
         { 
           opacity: 0,
-          y: 50
+          y: 60
         },
         {
           opacity: 1,
           y: 0,
-          duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 80%',
-            end: 'top 20%',
-            toggleActions: 'play none none reverse'
-          }
-        }
+          duration: 0.8,
+          ease: 'power3.out'
+        },
+        0
       )
+
+      // Heading character reveal animation
+      if (heading) {
+        const chars = splitTextIntoChars(heading)
+        tl.fromTo(
+          chars,
+          {
+            opacity: 0,
+            y: 30,
+            rotateX: -90
+          },
+          {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            duration: 0.6,
+            stagger: 0.02,
+            ease: 'back.out(1.7)'
+          },
+          0.1
+        )
+      }
+
+      // Paragraphs word reveal
+      paragraphs.forEach((p, pIndex) => {
+        const words = splitTextIntoWords(p)
+        tl.fromTo(
+          words,
+          {
+            opacity: 0,
+            y: 20,
+            filter: 'blur(4px)'
+          },
+          {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 0.5,
+            stagger: 0.03,
+            ease: 'power2.out'
+          },
+          0.3 + pIndex * 0.1
+        )
+      })
+
+      // List items stagger
+      if (listItems.length > 0) {
+        tl.fromTo(
+          listItems,
+          {
+            opacity: 0,
+            x: -30,
+            filter: 'blur(3px)'
+          },
+          {
+            opacity: 1,
+            x: 0,
+            filter: 'blur(0px)',
+            duration: 0.5,
+            stagger: 0.05,
+            ease: 'power2.out'
+          },
+          0.4
+        )
+      }
+
+      // Cards stagger
+      if (cards.length > 0) {
+        tl.fromTo(
+          cards,
+          {
+            opacity: 0,
+            y: 40,
+            scale: 0.95
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: 'power3.out'
+          },
+          0.3
+        )
+      }
+
+      // Exit animation - scroll out effect
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'bottom 30%',
+        end: 'bottom -20%',
+        scrub: 1,
+        onUpdate: (self) => {
+          const progress = self.progress
+          
+          // Exit animation - slide up and fade out
+          gsap.to(sectionContent, {
+            y: -30 * progress,
+            opacity: 1 - progress * 0.3,
+            filter: `blur(${progress * 2}px)`,
+            duration: 0.1,
+            ease: 'none'
+          })
+        }
+      })
     })
 
     // Create a proxy object for 3D mesh animation
@@ -101,6 +287,39 @@ function App() {
       }
     })
 
+    // Pills animation
+    const pills = document.querySelectorAll('.pill')
+    pills.forEach((pill, i) => {
+      gsap.fromTo(
+        pill,
+        { opacity: 0, scale: 0.8, y: 20 },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.5,
+          delay: 0.5 + i * 0.1,
+          ease: 'back.out(1.7)'
+        }
+      )
+    })
+
+    // Contact chips animation
+    const chips = document.querySelectorAll('.chip')
+    chips.forEach((chip, i) => {
+      gsap.fromTo(
+        chip,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.4,
+          delay: 0.8 + i * 0.08,
+          ease: 'power2.out'
+        }
+      )
+    })
+
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill())
       if (lenisRef.current) {
@@ -114,8 +333,11 @@ function App() {
 
   return (
     <div className="App">
+      {/* Custom cursor */}
+      <CustomCursor />
+      
       {/* Fixed 3D Canvas */}
-      <Scene scrollRef={scrollRef} meshRef={meshRef} />
+      <Scene scrollRef={scrollRef} meshRef={meshRef} particleMode={particleMode} />
 
       {/* Scrollable HTML content overlay */}
       <div className="content">

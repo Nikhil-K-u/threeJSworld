@@ -1,5 +1,7 @@
 uniform float uTime;
 uniform float uScrollProgress;
+uniform vec3 uMousePosition;
+uniform float uMouseInfluence;
 varying vec2 vUv;
 varying vec3 vPosition;
 varying vec3 vNormal;
@@ -97,7 +99,23 @@ void main() {
   // Add scroll-based deformation
   float scrollInfluence = sin(pos.y * 3.0 + uScrollProgress * 3.14159) * 0.1;
   
+  // Magnetic vertex distortion - vertices bulge away from mouse position
+  vec3 worldPos = (modelMatrix * vec4(pos, 1.0)).xyz;
+  vec3 toMouse = worldPos - uMousePosition;
+  float mouseDistance = length(toMouse);
+  
+  // Spring-physics feel: stronger effect when closer, with smooth falloff
+  float magneticRadius = 2.0;
+  float magneticStrength = 0.4;
+  float springFalloff = smoothstep(magneticRadius, 0.0, mouseDistance);
+  float springForce = springFalloff * springFalloff * magneticStrength * uMouseInfluence;
+  
+  // Push vertices away from mouse (bulge effect) with proper zero-length check
+  vec3 pushDirection = mouseDistance > 0.001 ? normalize(toMouse) : vec3(0.0, 1.0, 0.0);
+  vec3 magneticDisplacement = pushDirection * springForce;
+  
   pos += normal * (distortion + scrollInfluence);
+  pos += magneticDisplacement;
   
   vPosition = pos;
   vNormal = normalize(normalMatrix * normal);

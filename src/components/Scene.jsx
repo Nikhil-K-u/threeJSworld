@@ -3,8 +3,9 @@ import { Canvas } from '@react-three/fiber'
 import LiquidMesh from './LiquidMesh'
 import Loader from './Loader'
 import ResponsiveCamera from './ResponsiveCamera'
+import Effects from './Effects'
 
-export default function Scene({ scrollRef, meshRef }) {
+export default function Scene({ scrollRef, meshRef, particleMode }) {
   return (
     <Canvas
       className="canvas-container"
@@ -31,8 +32,11 @@ export default function Scene({ scrollRef, meshRef }) {
       
       {/* Main 3D content with Suspense loader */}
       <Suspense fallback={<Loader />}>
-        <LiquidMesh scrollRef={scrollRef} ref={meshRef} />
+        <LiquidMesh scrollRef={scrollRef} ref={meshRef} particleMode={particleMode} />
       </Suspense>
+      
+      {/* Post-processing effects */}
+      <Effects scrollRef={scrollRef} />
     </Canvas>
   )
 }
