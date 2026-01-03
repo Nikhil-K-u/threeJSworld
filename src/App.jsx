@@ -271,16 +271,15 @@ function App() {
           const rotationY = progress * Math.PI * 2
           const rotationX = Math.sin(progress * Math.PI) * 0.3
           const positionY = Math.sin(progress * Math.PI * 2) * 0.5
-          // Move mesh BACKWARD (away from camera) instead of forward to prevent clipping
-          // Camera is at z=5, mesh starts at z=0, so moving negative keeps it in view
-          const positionZ = -(progress * 1.5)
+          // Keep mesh at z=0 - no Z-axis movement to prevent vanishing
+          // Camera is at z=5, mesh stays at z=0 (5 units away, always in view)
           
           // Apply using quick setters if initialized
           if (quickSettersRef.current.initialized) {
             quickSettersRef.current.rotationY(rotationY)
             quickSettersRef.current.rotationX(rotationX)
             quickSettersRef.current.positionY(positionY)
-            quickSettersRef.current.positionZ(positionZ)
+            // No Z-axis movement - mesh stays at z=0
           } else {
             // Fallback: try to initialize if not done yet
             initQuickSetters()
