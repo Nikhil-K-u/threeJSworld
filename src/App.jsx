@@ -121,21 +121,39 @@ function App() {
       <div className="content">
         <section className="hero">
           <div className="section-content">
-            <p className="eyebrow">Full Stack / Backend Engineer</p>
+            <div className="pill-row">
+              <span className="pill">Full Stack / Backend</span>
+              <span className="pill">BFF &amp; System Design</span>
+              <span className="pill">Next.js · Java · MongoDB</span>
+            </div>
             <h1>Nikhil Kumar</h1>
-            <p>Hyderabad, India</p>
+            <p className="location">Hyderabad, India</p>
             <div className="contact-links">
-              <a href="mailto:nk605326@gmail.com">nk605326@gmail.com</a>
-              <span>+91 7327883029</span>
-              <a href="https://www.linkedin.com/in/nkupa/" target="_blank" rel="noreferrer">linkedin.com/in/nkupa</a>
-              <a href="https://github.com/Nikhil-K-u" target="_blank" rel="noreferrer">github.com/Nikhil-K-u</a>
-              <a href="https://nikhil-k-u.github.io/" target="_blank" rel="noreferrer">nkup.me</a>
+              <a className="chip" href="mailto:nk605326@gmail.com">Email</a>
+              <span className="chip muted">+91 7327883029</span>
+              <a className="chip" href="https://www.linkedin.com/in/nkupa/" target="_blank" rel="noreferrer">LinkedIn</a>
+              <a className="chip" href="https://github.com/Nikhil-K-u" target="_blank" rel="noreferrer">GitHub</a>
+              <a className="chip" href="https://nikhil-k-u.github.io/" target="_blank" rel="noreferrer">Portfolio</a>
+            </div>
+            <div className="hero-highlights">
+              <div className="stat-card">
+                <span className="stat-value">70%</span>
+                <span className="stat-label">Throughput boost via multithreading</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-value">300k+</span>
+                <span className="stat-label">Redundant API calls removed per batch</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-value">200k+</span>
+                <span className="stat-label">Records optimized in aggregation pipelines</span>
+              </div>
             </div>
           </div>
         </section>
 
         <section>
-          <div className="section-content">
+          <div className="section-content card">
             <h2>Technical Skills</h2>
             <ul className="bullet-list">
               <li><strong>Languages:</strong> Java, Python, SQL, JavaScript (Next.js)</li>
@@ -148,7 +166,7 @@ function App() {
         </section>
 
         <section>
-          <div className="section-content">
+          <div className="section-content card">
             <h2>Experience</h2>
             <div className="experience-item">
               <div className="item-header">
@@ -177,10 +195,10 @@ function App() {
         </section>
 
         <section>
-          <div className="section-content">
+          <div className="section-content card">
             <h2>Projects</h2>
 
-            <div className="experience-item">
+            <div className="experience-item project">
               <div className="item-header">
                 <span className="item-title">311 Service Portal | Next.js, AWS (S3, SNS, SES), OpenAI, Leaflet</span>
               </div>
@@ -193,7 +211,7 @@ function App() {
               </ul>
             </div>
 
-            <div className="experience-item">
+            <div className="experience-item project">
               <div className="item-header">
                 <span className="item-title">JalDristi — Multi-Modal AI Analytics | Python, Azure CV, OpenAI, Selenium</span>
               </div>
@@ -204,7 +222,7 @@ function App() {
               </ul>
             </div>
 
-            <div className="experience-item">
+            <div className="experience-item project">
               <div className="item-header">
                 <span className="item-title">PDFSol — RAG Document Search | Python, LangChain, Qdrant, Streamlit</span>
               </div>
@@ -218,7 +236,7 @@ function App() {
         </section>
 
         <section>
-          <div className="section-content">
+          <div className="section-content card">
             <h2>Education</h2>
             <div className="experience-item">
               <div className="item-header">
@@ -230,24 +248,24 @@ function App() {
         </section>
 
         <section>
-          <div className="section-content">
+          <div className="section-content card">
             <h2>Licenses &amp; Certifications</h2>
 
-            <div className="experience-item">
+            <div className="experience-item cert">
               <div className="item-header">
                 <a href="https://www.credly.com/badges/0abbe0db-40a7-4a04-bc3a-c2db873c16d0/public_url" target="_blank" rel="noreferrer" className="item-title">Google Cybersecurity Specialization — Google</a>
               </div>
               <p>Completed the 8-course professional certificate with hands-on Linux, SQL, Threat Detection, Incident Response, Network Security, Risk Management, and Python automation.</p>
             </div>
 
-            <div className="experience-item">
+            <div className="experience-item cert">
               <div className="item-header">
                 <a href="https://www.credly.com/badges/f715bdc3-af16-4e83-b84f-68dc9bbf9025/public_url" target="_blank" rel="noreferrer" className="item-title">Microsoft Certified: AI Fundamentals — Microsoft</a>
               </div>
               <p>Learned core AI/ML concepts, responsible AI, and Azure-based implementation strategies.</p>
             </div>
 
-            <div className="experience-item">
+            <div className="experience-item cert">
               <div className="item-header">
                 <a href="https://learn.microsoft.com/api/credentials/share/en-us/Nkupa/4A04ABBB658E66C2?sharingId=7B5F822BEF56BFF8" target="_blank" rel="noreferrer" className="item-title">Microsoft Certified: Security, Compliance, and Identity Fundamentals — Microsoft</a>
               </div>
