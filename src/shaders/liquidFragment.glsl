@@ -43,11 +43,10 @@ void main() {
   // Add edge glow with Fresnel (bloom-like effect)
   finalColor += fresnel * 0.4;
   
-  // Boost brightness for bloom effect on bright areas
+  // Boost brightness for bloom effect on bright areas (branchless)
   float brightness = dot(finalColor, vec3(0.299, 0.587, 0.114));
-  if (brightness > 1.0) {
-    finalColor += (brightness - 1.0) * 0.5;
-  }
+  float bloomBoost = max(0.0, brightness - 1.0) * 0.5;
+  finalColor += bloomBoost;
   
   // Add subtle pulsing
   finalColor *= 0.8 + sin(uTime) * 0.2;
