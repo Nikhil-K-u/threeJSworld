@@ -123,7 +123,7 @@ function App() {
           <div className="section-content">
             <div className="pill-row">
               <span className="pill">Full Stack / Backend</span>
-              <span className="pill">BFF &amp; System Design</span>
+              <span className="pill">BFF and System Design</span>
               <span className="pill">Next.js · Java · MongoDB</span>
             </div>
             <h1>Nikhil Kumar</h1>
@@ -249,7 +249,7 @@ function App() {
 
         <section>
           <div className="section-content card">
-            <h2>Licenses &amp; Certifications</h2>
+            <h2>Licenses and Certifications</h2>
 
             <div className="experience-item cert">
               <div className="item-header">
