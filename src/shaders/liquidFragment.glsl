@@ -7,6 +7,11 @@ varying vec2 vUv;
 varying vec3 vPosition;
 varying vec3 vNormal;
 
+// Simple noise function for film grain effect
+float random(vec2 st) {
+  return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
 void main() {
   // Create gradient based on position
   float mixValue = sin(vPosition.y * 2.0 + uTime * 0.5) * 0.5 + 0.5;
@@ -33,11 +38,21 @@ void main() {
   // Apply iridescent effect at edges
   finalColor = mix(finalColor, iridescent, fresnel * 0.6);
   
-  // Add edge glow with Fresnel
+  // Add edge glow with Fresnel (bloom-like effect)
   finalColor += fresnel * 0.4;
+  
+  // Boost brightness for bloom effect on bright areas
+  float brightness = dot(finalColor, vec3(0.299, 0.587, 0.114));
+  if (brightness > 1.0) {
+    finalColor += (brightness - 1.0) * 0.5;
+  }
   
   // Add subtle pulsing
   finalColor *= 0.8 + sin(uTime) * 0.2;
+  
+  // Add subtle noise for film grain effect (0.05 opacity)
+  float noise = random(vUv + uTime * 0.1) * 2.0 - 1.0;
+  finalColor += noise * 0.05;
   
   gl_FragColor = vec4(finalColor, 1.0);
 }
