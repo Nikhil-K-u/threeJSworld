@@ -124,10 +124,15 @@ body {
 .bullet-list {
   list-style: disc;
   padding-left: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
   max-width: none;
+}
+
+.bullet-list li {
+  margin-bottom: 0.5rem;
+}
+
+.bullet-list li:last-child {
+  margin-bottom: 0;
 }
 
 .experience-item {
