@@ -7,7 +7,7 @@ import fragmentShader from '../shaders/liquidFragment.glsl?raw'
 const LiquidMesh = forwardRef(({ scrollProgress }, ref) => {
   const meshRef = ref || useRef()
   const materialRef = useRef()
-  const mouseRotation = useRef({ x: 0, y: 0 })
+  const mouseGroupRef = useRef()
 
   // Shader uniforms
   const uniforms = useMemo(
@@ -28,47 +28,44 @@ const LiquidMesh = forwardRef(({ scrollProgress }, ref) => {
       materialRef.current.uniforms.uScrollProgress.value = scrollProgress
     }
 
-    // Mouse-follow effect with heavy lag using lerp
-    if (meshRef.current) {
+    // Mouse-follow effect with heavy lag using lerp (independent of scroll rotation)
+    if (mouseGroupRef.current) {
       // Get mouse coordinates from state (-1 to 1)
       const mouseX = state.mouse.x
       const mouseY = state.mouse.y
 
-      // Target rotation based on mouse position (independent of scroll)
+      // Target rotation based on mouse position
       const targetRotationY = mouseX * 0.3
       const targetRotationX = -mouseY * 0.3
 
       // Apply heavy lag effect using lerp (0.02 = very slow, heavy lag)
-      mouseRotation.current.x = THREE.MathUtils.lerp(
-        mouseRotation.current.x,
+      mouseGroupRef.current.rotation.x = THREE.MathUtils.lerp(
+        mouseGroupRef.current.rotation.x,
         targetRotationX,
         0.02
       )
-      mouseRotation.current.y = THREE.MathUtils.lerp(
-        mouseRotation.current.y,
+      mouseGroupRef.current.rotation.y = THREE.MathUtils.lerp(
+        mouseGroupRef.current.rotation.y,
         targetRotationY,
         0.02
       )
-
-      // Apply mouse rotation on top of existing rotation (from scroll)
-      // Store original rotation and add mouse offset
-      meshRef.current.rotation.x += mouseRotation.current.x * 0.1
-      meshRef.current.rotation.y += mouseRotation.current.y * 0.1
     }
   })
 
   return (
-    <mesh ref={meshRef} scale={1.5}>
-      <icosahedronGeometry args={[1, 32]} />
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={uniforms}
-        wireframe={false}
-        side={THREE.DoubleSide}
-      />
-    </mesh>
+    <group ref={mouseGroupRef}>
+      <mesh ref={meshRef} scale={1.5}>
+        <icosahedronGeometry args={[1, 32]} />
+        <shaderMaterial
+          ref={materialRef}
+          vertexShader={vertexShader}
+          fragmentShader={fragmentShader}
+          uniforms={uniforms}
+          wireframe={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
   )
 })
 
