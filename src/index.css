@@ -8,6 +8,8 @@
   --accent-glow-a: rgba(102, 126, 234, 0.1);
   --accent-glow-b: rgba(240, 147, 251, 0.12);
   --accent-card-a: rgba(102, 126, 234, 0.12);
+  --glow-pos-a: 20% 20%;
+  --glow-pos-b: 80% 0%;
 }
 
 html {
@@ -21,8 +23,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: radial-gradient(circle at 20% 20%, var(--accent-glow-a), transparent 35%),
-    radial-gradient(circle at 80% 0%, var(--accent-glow-b), transparent 30%),
+  background: radial-gradient(circle at var(--glow-pos-a), var(--accent-glow-a), transparent 35%),
+    radial-gradient(circle at var(--glow-pos-b), var(--accent-glow-b), transparent 30%),
     #050510;
   color: #fff;
   overflow-x: hidden;
