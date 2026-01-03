@@ -7,6 +7,8 @@ varying vec2 vUv;
 varying vec3 vPosition;
 varying vec3 vNormal;
 
+const float TWO_PI = 6.28318530718;
+
 // Simple noise function for film grain effect
 float random(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
@@ -30,9 +32,9 @@ void main() {
   
   // Create iridescent colors based on Fresnel at edges
   vec3 iridescent = vec3(
-    sin(fresnel * 6.28 + uTime * 0.5) * 0.5 + 0.5,
-    sin(fresnel * 6.28 + uTime * 0.7 + 2.0) * 0.5 + 0.5,
-    sin(fresnel * 6.28 + uTime * 0.3 + 4.0) * 0.5 + 0.5
+    sin(fresnel * TWO_PI + uTime * 0.5) * 0.5 + 0.5,
+    sin(fresnel * TWO_PI + uTime * 0.7 + 2.0) * 0.5 + 0.5,
+    sin(fresnel * TWO_PI + uTime * 0.3 + 4.0) * 0.5 + 0.5
   );
   
   // Apply iridescent effect at edges
