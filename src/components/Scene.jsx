@@ -4,10 +4,16 @@ import LiquidMesh from './LiquidMesh'
 import Loader from './Loader'
 import ResponsiveCamera from './ResponsiveCamera'
 
-export default function Scene({ scrollProgress, meshRef }) {
+export default function Scene({ scrollRef, meshRef }) {
   return (
     <Canvas
       className="canvas-container"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 0
+      }}
       gl={{
         antialias: true,
         alpha: true,
@@ -23,9 +29,9 @@ export default function Scene({ scrollProgress, meshRef }) {
       <directionalLight position={[10, 10, 5]} intensity={1} />
       <pointLight position={[-10, -10, -5]} intensity={0.5} color="#764ba2" />
       
-      {/* Main 3D content with Suspense loader and integrated post-processing effects */}
+      {/* Main 3D content with Suspense loader */}
       <Suspense fallback={<Loader />}>
-        <LiquidMesh scrollProgress={scrollProgress} ref={meshRef} />
+        <LiquidMesh scrollRef={scrollRef} ref={meshRef} />
       </Suspense>
     </Canvas>
   )
