@@ -5,6 +5,7 @@ uniform vec3 uColor2;
 uniform vec3 uColor3;
 varying vec2 vUv;
 varying vec3 vPosition;
+varying vec3 vNormal;
 
 void main() {
   // Create gradient based on position
@@ -16,12 +17,10 @@ void main() {
   vec3 color2 = mix(uColor2, uColor3, mixValue2);
   vec3 finalColor = mix(color1, color2, sin(uTime * 0.3) * 0.5 + 0.5);
   
-  // Add fresnel effect for edges
+  // Add fresnel-like edge glow based on surface normal
   vec3 normal = normalize(cross(dFdx(vPosition), dFdy(vPosition)));
-  vec3 viewDirection = normalize(cameraPosition - vPosition);
-  float fresnel = pow(1.0 - abs(dot(normal, viewDirection)), 2.0);
-  
-  finalColor += fresnel * 0.3;
+  float edgeGlow = abs(normal.z);
+  finalColor += (1.0 - edgeGlow) * 0.3;
   
   // Add subtle pulsing
   finalColor *= 0.8 + sin(uTime) * 0.2;

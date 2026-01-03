@@ -30,7 +30,7 @@ const LiquidMesh = forwardRef(({ scrollProgress }, ref) => {
 
   return (
     <mesh ref={meshRef} scale={1.5}>
-      <icosahedronGeometry args={[1, 64]} />
+      <icosahedronGeometry args={[1, 32]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}

@@ -1,6 +1,5 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
 import LiquidMesh from './LiquidMesh'
 import Loader from './Loader'
 import ResponsiveCamera from './ResponsiveCamera'
@@ -28,9 +27,6 @@ export default function Scene({ scrollProgress, meshRef }) {
       <Suspense fallback={<Loader />}>
         <LiquidMesh scrollProgress={scrollProgress} ref={meshRef} />
       </Suspense>
-      
-      {/* Optional: Orbit controls for development (can be removed for production) */}
-      {/* <OrbitControls enableZoom={false} enablePan={false} /> */}
     </Canvas>
   )
 }
