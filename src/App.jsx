@@ -275,7 +275,7 @@ function App() {
         </section>
 
         <section>
-          <div className="section-content">
+          <div className="section-content card">
             <h2>Let's Build</h2>
             <p>Open to collaborating on high-impact backend, cloud-native, and AI-driven products.</p>
           </div>
