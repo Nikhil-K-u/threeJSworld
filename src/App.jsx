@@ -58,6 +58,15 @@ function App() {
   const lenisRef = useRef(null)
   const rafFunctionRef = useRef(null)
   const [particleMode, setParticleMode] = useState(0)
+  
+  // Store quickSetters in refs for proper React lifecycle management
+  const quickSettersRef = useRef({
+    rotationY: null,
+    rotationX: null,
+    positionY: null,
+    positionZ: null,
+    initialized: false
+  })
 
   useEffect(() => {
     // Create GSAP context for proper cleanup
@@ -248,19 +257,19 @@ function App() {
         })
       })
 
-      // Create high-performance setters for mesh animation
-      // Using gsap.quickSetter for optimal performance in scroll updates
-      let setMeshRotationY, setMeshRotationX, setMeshPositionY, setMeshPositionZ
-      
-      // Initialize quick setters once mesh is available
+      // Initialize quick setters once mesh is available (outside the scroll loop)
       const initQuickSetters = () => {
-        if (meshRef.current) {
-          setMeshRotationY = gsap.quickSetter(meshRef.current.rotation, 'y', 'number')
-          setMeshRotationX = gsap.quickSetter(meshRef.current.rotation, 'x', 'number')
-          setMeshPositionY = gsap.quickSetter(meshRef.current.position, 'y', 'number')
-          setMeshPositionZ = gsap.quickSetter(meshRef.current.position, 'z', 'number')
+        if (meshRef.current && !quickSettersRef.current.initialized) {
+          quickSettersRef.current.rotationY = gsap.quickSetter(meshRef.current.rotation, 'y', 'number')
+          quickSettersRef.current.rotationX = gsap.quickSetter(meshRef.current.rotation, 'x', 'number')
+          quickSettersRef.current.positionY = gsap.quickSetter(meshRef.current.position, 'y', 'number')
+          quickSettersRef.current.positionZ = gsap.quickSetter(meshRef.current.position, 'z', 'number')
+          quickSettersRef.current.initialized = true
         }
       }
+      
+      // Try to initialize immediately if mesh exists
+      initQuickSetters()
 
       // Animate mesh rotation and position based on scroll
       ScrollTrigger.create({
@@ -280,19 +289,15 @@ function App() {
           const positionY = Math.sin(progress * Math.PI * 2) * 0.5
           const positionZ = progress * 2
           
-          // Apply to mesh using quick setters (no gsap.to needed!)
-          if (meshRef.current) {
-            // Initialize setters on first frame if not done
-            if (!setMeshRotationY) {
-              initQuickSetters()
-            }
-            
-            if (setMeshRotationY) {
-              setMeshRotationY(rotationY)
-              setMeshRotationX(rotationX)
-              setMeshPositionY(positionY)
-              setMeshPositionZ(positionZ)
-            }
+          // Apply using quick setters if initialized
+          if (quickSettersRef.current.initialized) {
+            quickSettersRef.current.rotationY(rotationY)
+            quickSettersRef.current.rotationX(rotationX)
+            quickSettersRef.current.positionY(positionY)
+            quickSettersRef.current.positionZ(positionZ)
+          } else {
+            // Fallback: try to initialize if not done yet
+            initQuickSetters()
           }
         }
       })
@@ -332,6 +337,15 @@ function App() {
     }) // End of gsap.context
 
     return () => {
+      // Reset quickSetters
+      quickSettersRef.current = {
+        rotationY: null,
+        rotationX: null,
+        positionY: null,
+        positionZ: null,
+        initialized: false
+      }
+      
       // Clean up GSAP context (removes all animations created within it)
       ctx.revert()
       

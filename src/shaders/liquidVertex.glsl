@@ -90,6 +90,9 @@ void main() {
   
   // Optimized liquid distortion - single noise call with layered frequencies
   // This replaces 3 expensive snoise calls with 1 call and mathematical layering
+  // Trade-off: Slightly less organic variation than 3 independent noise calls,
+  // but ~3x better performance. The trigonometric layering still provides
+  // sufficient visual complexity for smooth, liquid-like motion.
   vec3 noiseCoord = vec3(
     pos.x * 2.0 + uTime * 0.3,
     pos.y * 2.0 + uTime * 0.2,
