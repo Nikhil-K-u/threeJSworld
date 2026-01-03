@@ -4,6 +4,12 @@
   box-sizing: border-box;
 }
 
+:root {
+  --accent-glow-a: rgba(102, 126, 234, 0.1);
+  --accent-glow-b: rgba(240, 147, 251, 0.12);
+  --accent-card-a: rgba(102, 126, 234, 0.12);
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -15,8 +21,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.1), transparent 35%),
-    radial-gradient(circle at 80% 0%, rgba(240, 147, 251, 0.12), transparent 30%),
+  background: radial-gradient(circle at 20% 20%, var(--accent-glow-a), transparent 35%),
+    radial-gradient(circle at 80% 0%, var(--accent-glow-b), transparent 30%),
     #050510;
   color: #fff;
   overflow-x: hidden;
@@ -229,7 +235,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   padding: 1rem;
-  background: linear-gradient(145deg, rgba(102, 126, 234, 0.12), rgba(240, 147, 251, 0.12));
+  background: linear-gradient(145deg, var(--accent-card-a), var(--accent-glow-b));
   text-align: left;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
