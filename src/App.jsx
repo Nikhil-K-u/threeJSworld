@@ -60,271 +60,287 @@ function App() {
   const [particleMode, setParticleMode] = useState(0)
 
   useEffect(() => {
-    // Initialize Lenis smooth scroll
-    lenisRef.current = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smooth: true,
-      smoothTouch: false
-    })
+    // Create GSAP context for proper cleanup
+    const ctx = gsap.context(() => {
+      // Initialize Lenis smooth scroll
+      lenisRef.current = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smooth: true,
+        smoothTouch: false
+      })
 
-    // Update ScrollTrigger on every Lenis tick
-    lenisRef.current.on('scroll', ScrollTrigger.update)
+      // Update ScrollTrigger on every Lenis tick
+      lenisRef.current.on('scroll', ScrollTrigger.update)
 
-    // Sync Lenis with GSAP ticker
-    rafFunctionRef.current = (time) => {
-      lenisRef.current.raf(time * 1000)
-    }
-    gsap.ticker.add(rafFunctionRef.current)
+      // Sync Lenis with GSAP ticker
+      rafFunctionRef.current = (time) => {
+        lenisRef.current.raf(time * 1000)
+      }
+      gsap.ticker.add(rafFunctionRef.current)
 
-    // Disable lag smoothing for more accurate sync
-    gsap.ticker.lagSmoothing(0)
+      // Disable lag smoothing for more accurate sync
+      gsap.ticker.lagSmoothing(0)
 
-    // Advanced scroll animations for sections
-    const sections = document.querySelectorAll('.content section')
+      // Advanced scroll animations for sections with "coming and going" flow
+      const sections = document.querySelectorAll('.content section')
 
-    sections.forEach((section, index) => {
-      const sectionContent = section.querySelector('.section-content')
-      const heading = section.querySelector('h1, h2')
-      const paragraphs = section.querySelectorAll('p')
-      const listItems = section.querySelectorAll('li')
-      const cards = section.querySelectorAll('.experience-item, .stat-card')
-      const isProjectSection = section.querySelector('.project')
+      sections.forEach((section, index) => {
+        const sectionContent = section.querySelector('.section-content')
+        const heading = section.querySelector('h1, h2')
+        const paragraphs = section.querySelectorAll('p')
+        const listItems = section.querySelectorAll('li')
+        const cards = section.querySelectorAll('.experience-item, .stat-card')
+        const isProjectSection = section.querySelector('.project')
 
-      // Create timeline for this section
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 80%',
-          end: 'bottom 20%',
-          toggleActions: 'play reverse play reverse',
-          onEnter: () => {
-            // Activate particle mode for projects section
-            if (isProjectSection) {
-              setParticleMode(1)
-            }
-          },
-          onLeave: () => {
-            if (isProjectSection) {
-              setParticleMode(0)
-            }
-          },
-          onEnterBack: () => {
-            if (isProjectSection) {
-              setParticleMode(1)
-            }
-          },
-          onLeaveBack: () => {
-            if (isProjectSection) {
-              setParticleMode(0)
+        // Create timeline for entry animation
+        const entryTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 80%',
+            end: 'top 20%',
+            toggleActions: 'play none none none',
+            onEnter: () => {
+              // Activate particle mode for projects section
+              if (isProjectSection) {
+                setParticleMode(1)
+              }
+            },
+            onEnterBack: () => {
+              if (isProjectSection) {
+                setParticleMode(1)
+              }
             }
           }
-        }
-      })
+        })
 
-      // Section fade in
-      tl.fromTo(
-        sectionContent,
-        { 
-          opacity: 0,
-          y: 60
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: 'power3.out'
-        },
-        0
-      )
-
-      // Heading character reveal animation
-      if (heading) {
-        const chars = splitTextIntoChars(heading)
-        tl.fromTo(
-          chars,
-          {
+        // Entry: Flow in from below (slide up with stagger)
+        entryTl.fromTo(
+          sectionContent,
+          { 
             opacity: 0,
-            y: 30,
-            rotateX: -90
-          },
-          {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            duration: 0.6,
-            stagger: 0.02,
-            ease: 'back.out(1.7)'
-          },
-          0.1
-        )
-      }
-
-      // Paragraphs word reveal
-      paragraphs.forEach((p, pIndex) => {
-        const words = splitTextIntoWords(p)
-        tl.fromTo(
-          words,
-          {
-            opacity: 0,
-            y: 20,
-            filter: 'blur(4px)'
-          },
-          {
-            opacity: 1,
-            y: 0,
-            filter: 'blur(0px)',
-            duration: 0.5,
-            stagger: 0.03,
-            ease: 'power2.out'
-          },
-          0.3 + pIndex * 0.1
-        )
-      })
-
-      // List items stagger
-      if (listItems.length > 0) {
-        tl.fromTo(
-          listItems,
-          {
-            opacity: 0,
-            x: -30,
-            filter: 'blur(3px)'
-          },
-          {
-            opacity: 1,
-            x: 0,
-            filter: 'blur(0px)',
-            duration: 0.5,
-            stagger: 0.05,
-            ease: 'power2.out'
-          },
-          0.4
-        )
-      }
-
-      // Cards stagger
-      if (cards.length > 0) {
-        tl.fromTo(
-          cards,
-          {
-            opacity: 0,
-            y: 40,
+            y: 80,
             scale: 0.95
           },
           {
             opacity: 1,
             y: 0,
             scale: 1,
-            duration: 0.6,
-            stagger: 0.1,
+            duration: 1,
             ease: 'power3.out'
           },
-          0.3
+          0
         )
+
+        // Heading character reveal animation
+        if (heading) {
+          const chars = splitTextIntoChars(heading)
+          entryTl.fromTo(
+            chars,
+            {
+              opacity: 0,
+              y: 40,
+              rotateX: -90
+            },
+            {
+              opacity: 1,
+              y: 0,
+              rotateX: 0,
+              duration: 0.8,
+              stagger: 0.03,
+              ease: 'back.out(1.7)'
+            },
+            0.2
+          )
+        }
+
+        // Paragraphs word reveal
+        paragraphs.forEach((p, pIndex) => {
+          const words = splitTextIntoWords(p)
+          entryTl.fromTo(
+            words,
+            {
+              opacity: 0,
+              y: 30,
+              filter: 'blur(6px)'
+            },
+            {
+              opacity: 1,
+              y: 0,
+              filter: 'blur(0px)',
+              duration: 0.6,
+              stagger: 0.04,
+              ease: 'power2.out'
+            },
+            0.4 + pIndex * 0.15
+          )
+        })
+
+        // List items stagger
+        if (listItems.length > 0) {
+          entryTl.fromTo(
+            listItems,
+            {
+              opacity: 0,
+              x: -40,
+              filter: 'blur(4px)'
+            },
+            {
+              opacity: 1,
+              x: 0,
+              filter: 'blur(0px)',
+              duration: 0.6,
+              stagger: 0.08,
+              ease: 'power2.out'
+            },
+            0.5
+          )
+        }
+
+        // Cards stagger
+        if (cards.length > 0) {
+          entryTl.fromTo(
+            cards,
+            {
+              opacity: 0,
+              y: 50,
+              scale: 0.9
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.7,
+              stagger: 0.12,
+              ease: 'power3.out'
+            },
+            0.4
+          )
+        }
+
+        // Exit animation - flow out (accelerate away upward)
+        const exitTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'bottom 60%',
+            end: 'bottom top',
+            scrub: 1.5,
+            onLeave: () => {
+              if (isProjectSection) {
+                setParticleMode(0)
+              }
+            },
+            onLeaveBack: () => {
+              if (isProjectSection) {
+                setParticleMode(0)
+              }
+            }
+          }
+        })
+
+        // Exit: Accelerate upward and fade with blur
+        exitTl.to(sectionContent, {
+          y: -100,
+          opacity: 0,
+          scale: 0.92,
+          filter: 'blur(8px)',
+          ease: 'power2.in'
+        })
+      })
+
+      // Create high-performance setters for mesh animation
+      // Using gsap.quickSetter for optimal performance in scroll updates
+      let setMeshRotationY, setMeshRotationX, setMeshPositionY, setMeshPositionZ
+      
+      // Initialize quick setters once mesh is available
+      const initQuickSetters = () => {
+        if (meshRef.current) {
+          setMeshRotationY = gsap.quickSetter(meshRef.current.rotation, 'y', 'number')
+          setMeshRotationX = gsap.quickSetter(meshRef.current.rotation, 'x', 'number')
+          setMeshPositionY = gsap.quickSetter(meshRef.current.position, 'y', 'number')
+          setMeshPositionZ = gsap.quickSetter(meshRef.current.position, 'z', 'number')
+        }
       }
 
-      // Exit animation - scroll out effect
+      // Animate mesh rotation and position based on scroll
       ScrollTrigger.create({
-        trigger: section,
-        start: 'bottom 30%',
-        end: 'bottom -20%',
+        trigger: document.body,
+        start: 'top top',
+        end: 'bottom bottom',
         scrub: 1,
         onUpdate: (self) => {
           const progress = self.progress
           
-          // Exit animation - slide up and fade out
-          gsap.to(sectionContent, {
-            y: -30 * progress,
-            opacity: 1 - progress * 0.3,
-            filter: `blur(${progress * 2}px)`,
-            duration: 0.1,
-            ease: 'none'
-          })
+          // Update scroll ref for shader
+          scrollRef.current = progress
+          
+          // Calculate target values
+          const rotationY = progress * Math.PI * 2
+          const rotationX = Math.sin(progress * Math.PI) * 0.3
+          const positionY = Math.sin(progress * Math.PI * 2) * 0.5
+          const positionZ = progress * 2
+          
+          // Apply to mesh using quick setters (no gsap.to needed!)
+          if (meshRef.current) {
+            // Initialize setters on first frame if not done
+            if (!setMeshRotationY) {
+              initQuickSetters()
+            }
+            
+            if (setMeshRotationY) {
+              setMeshRotationY(rotationY)
+              setMeshRotationX(rotationX)
+              setMeshPositionY(positionY)
+              setMeshPositionZ(positionZ)
+            }
+          }
         }
       })
-    })
 
-    // Create a proxy object for 3D mesh animation
-    const proxy = { rotationY: 0, rotationX: 0, positionY: 0, positionZ: 0 }
+      // Pills animation
+      const pills = document.querySelectorAll('.pill')
+      pills.forEach((pill, i) => {
+        gsap.fromTo(
+          pill,
+          { opacity: 0, scale: 0.8, y: 20 },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.5,
+            delay: 0.5 + i * 0.1,
+            ease: 'back.out(1.7)'
+          }
+        )
+      })
 
-    // Animate mesh rotation and position based on scroll
-    ScrollTrigger.create({
-      trigger: document.body,
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 1,
-      onUpdate: (self) => {
-        const progress = self.progress
-        
-        // Update scroll ref for shader
-        scrollRef.current = progress
-        
-        // Smooth rotation
-        proxy.rotationY = progress * Math.PI * 2
-        proxy.rotationX = Math.sin(progress * Math.PI) * 0.3
-        
-        // Smooth position changes - mesh moves from Z=0 to Z=2 (camera at Z=5)
-        proxy.positionY = Math.sin(progress * Math.PI * 2) * 0.5
-        proxy.positionZ = progress * 2
-        
-        // Apply to mesh if available
-        if (meshRef.current) {
-          gsap.to(meshRef.current.rotation, {
-            y: proxy.rotationY,
-            x: proxy.rotationX,
-            duration: 0.1,
-            ease: 'none'
-          })
-          
-          gsap.to(meshRef.current.position, {
-            y: proxy.positionY,
-            z: proxy.positionZ,
-            duration: 0.1,
-            ease: 'none'
-          })
-        }
-      }
-    })
-
-    // Pills animation
-    const pills = document.querySelectorAll('.pill')
-    pills.forEach((pill, i) => {
-      gsap.fromTo(
-        pill,
-        { opacity: 0, scale: 0.8, y: 20 },
-        {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.5,
-          delay: 0.5 + i * 0.1,
-          ease: 'back.out(1.7)'
-        }
-      )
-    })
-
-    // Contact chips animation
-    const chips = document.querySelectorAll('.chip')
-    chips.forEach((chip, i) => {
-      gsap.fromTo(
-        chip,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.4,
-          delay: 0.8 + i * 0.08,
-          ease: 'power2.out'
-        }
-      )
-    })
+      // Contact chips animation
+      const chips = document.querySelectorAll('.chip')
+      chips.forEach((chip, i) => {
+        gsap.fromTo(
+          chip,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            delay: 0.8 + i * 0.08,
+            ease: 'power2.out'
+          }
+        )
+      })
+    }) // End of gsap.context
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+      // Clean up GSAP context (removes all animations created within it)
+      ctx.revert()
+      
+      // Clean up Lenis
       if (lenisRef.current) {
         lenisRef.current.destroy()
       }
+      
+      // Clean up GSAP ticker
       if (rafFunctionRef.current) {
         gsap.ticker.remove(rafFunctionRef.current)
       }
