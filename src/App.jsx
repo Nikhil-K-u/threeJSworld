@@ -102,141 +102,27 @@ function App() {
         const cards = section.querySelectorAll('.experience-item, .stat-card')
         const isProjectSection = section.querySelector('.project')
 
-        // Create timeline for entry animation
-        const entryTl = gsap.timeline({
+        // Create timeline for this section with proper reversing
+        const tl = gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: 'top 80%',
-            end: 'top 20%',
-            toggleActions: 'play none none none',
+            end: 'bottom 20%',
+            toggleActions: 'play reverse play reverse',
             onEnter: () => {
               // Activate particle mode for projects section
               if (isProjectSection) {
                 setParticleMode(1)
               }
             },
-            onEnterBack: () => {
-              if (isProjectSection) {
-                setParticleMode(1)
-              }
-            }
-          }
-        })
-
-        // Entry: Flow in from below (slide up with stagger)
-        entryTl.fromTo(
-          sectionContent,
-          { 
-            opacity: 0,
-            y: 80,
-            scale: 0.95
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1,
-            ease: 'power3.out'
-          },
-          0
-        )
-
-        // Heading character reveal animation
-        if (heading) {
-          const chars = splitTextIntoChars(heading)
-          entryTl.fromTo(
-            chars,
-            {
-              opacity: 0,
-              y: 40,
-              rotateX: -90
-            },
-            {
-              opacity: 1,
-              y: 0,
-              rotateX: 0,
-              duration: 0.8,
-              stagger: 0.03,
-              ease: 'back.out(1.7)'
-            },
-            0.2
-          )
-        }
-
-        // Paragraphs word reveal
-        paragraphs.forEach((p, pIndex) => {
-          const words = splitTextIntoWords(p)
-          entryTl.fromTo(
-            words,
-            {
-              opacity: 0,
-              y: 30,
-              filter: 'blur(6px)'
-            },
-            {
-              opacity: 1,
-              y: 0,
-              filter: 'blur(0px)',
-              duration: 0.6,
-              stagger: 0.04,
-              ease: 'power2.out'
-            },
-            0.4 + pIndex * 0.15
-          )
-        })
-
-        // List items stagger
-        if (listItems.length > 0) {
-          entryTl.fromTo(
-            listItems,
-            {
-              opacity: 0,
-              x: -40,
-              filter: 'blur(4px)'
-            },
-            {
-              opacity: 1,
-              x: 0,
-              filter: 'blur(0px)',
-              duration: 0.6,
-              stagger: 0.08,
-              ease: 'power2.out'
-            },
-            0.5
-          )
-        }
-
-        // Cards stagger
-        if (cards.length > 0) {
-          entryTl.fromTo(
-            cards,
-            {
-              opacity: 0,
-              y: 50,
-              scale: 0.9
-            },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.7,
-              stagger: 0.12,
-              ease: 'power3.out'
-            },
-            0.4
-          )
-        }
-
-        // Exit animation - flow out (accelerate away upward)
-        const exitTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: 'bottom 60%',
-            end: 'bottom top',
-            scrub: 1.5,
             onLeave: () => {
               if (isProjectSection) {
                 setParticleMode(0)
+              }
+            },
+            onEnterBack: () => {
+              if (isProjectSection) {
+                setParticleMode(1)
               }
             },
             onLeaveBack: () => {
@@ -247,14 +133,107 @@ function App() {
           }
         })
 
-        // Exit: Accelerate upward and fade with blur
-        exitTl.to(sectionContent, {
-          y: -100,
-          opacity: 0,
-          scale: 0.92,
-          filter: 'blur(8px)',
-          ease: 'power2.in'
+        // Section entrance animation
+        tl.fromTo(
+          sectionContent,
+          { 
+            opacity: 0,
+            y: 60
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'power3.out'
+          },
+          0
+        )
+
+        // Heading character reveal animation
+        if (heading) {
+          const chars = splitTextIntoChars(heading)
+          tl.fromTo(
+            chars,
+            {
+              opacity: 0,
+              y: 30,
+              rotateX: -90
+            },
+            {
+              opacity: 1,
+              y: 0,
+              rotateX: 0,
+              duration: 0.6,
+              stagger: 0.02,
+              ease: 'back.out(1.7)'
+            },
+            0.1
+          )
+        }
+
+        // Paragraphs word reveal
+        paragraphs.forEach((p, pIndex) => {
+          const words = splitTextIntoWords(p)
+          tl.fromTo(
+            words,
+            {
+              opacity: 0,
+              y: 20,
+              filter: 'blur(4px)'
+            },
+            {
+              opacity: 1,
+              y: 0,
+              filter: 'blur(0px)',
+              duration: 0.5,
+              stagger: 0.03,
+              ease: 'power2.out'
+            },
+            0.3 + pIndex * 0.1
+          )
         })
+
+        // List items stagger
+        if (listItems.length > 0) {
+          tl.fromTo(
+            listItems,
+            {
+              opacity: 0,
+              x: -30,
+              filter: 'blur(3px)'
+            },
+            {
+              opacity: 1,
+              x: 0,
+              filter: 'blur(0px)',
+              duration: 0.5,
+              stagger: 0.05,
+              ease: 'power2.out'
+            },
+            0.4
+          )
+        }
+
+        // Cards stagger
+        if (cards.length > 0) {
+          tl.fromTo(
+            cards,
+            {
+              opacity: 0,
+              y: 40,
+              scale: 0.95
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.6,
+              stagger: 0.1,
+              ease: 'power3.out'
+            },
+            0.3
+          )
+        }
       })
 
       // Initialize quick setters once mesh is available (outside the scroll loop)
