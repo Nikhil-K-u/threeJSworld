@@ -9,6 +9,10 @@ const LiquidMesh = forwardRef(({ scrollRef }, ref) => {
   const materialRef = useRef()
   const mouseGroupRef = useRef()
 
+  // Mouse interaction constants
+  const MOUSE_ROTATION_SENSITIVITY = 0.5
+  const MOUSE_LERP_FACTOR = 0.1 // Heavy magnetic parallax effect
+
   // Shader uniforms
   const uniforms = useMemo(
     () => ({
@@ -36,19 +40,19 @@ const LiquidMesh = forwardRef(({ scrollRef }, ref) => {
       const mouseY = state.mouse.y
 
       // Target rotation based on mouse position (magnetic effect)
-      const targetRotationY = mouseX * 0.5
-      const targetRotationX = -mouseY * 0.5
+      const targetRotationY = mouseX * MOUSE_ROTATION_SENSITIVITY
+      const targetRotationX = -mouseY * MOUSE_ROTATION_SENSITIVITY
 
       // Apply heavy, satisfying lag using lerp (0.1 = heavy magnetic feel)
       mouseGroupRef.current.rotation.x = THREE.MathUtils.lerp(
         mouseGroupRef.current.rotation.x,
         targetRotationX,
-        0.1
+        MOUSE_LERP_FACTOR
       )
       mouseGroupRef.current.rotation.y = THREE.MathUtils.lerp(
         mouseGroupRef.current.rotation.y,
         targetRotationY,
-        0.1
+        MOUSE_LERP_FACTOR
       )
     }
   })
