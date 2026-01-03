@@ -58,273 +58,282 @@ function App() {
   const lenisRef = useRef(null)
   const rafFunctionRef = useRef(null)
   const [particleMode, setParticleMode] = useState(0)
+  
+  // Store quickSetters in refs for proper React lifecycle management
+  const quickSettersRef = useRef({
+    rotationY: null,
+    rotationX: null,
+    positionY: null,
+    positionZ: null,
+    initialized: false
+  })
 
   useEffect(() => {
-    // Initialize Lenis smooth scroll
-    lenisRef.current = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smooth: true,
-      smoothTouch: false
-    })
+    // Create GSAP context for proper cleanup
+    const ctx = gsap.context(() => {
+      // Initialize Lenis smooth scroll
+      lenisRef.current = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smooth: true,
+        smoothTouch: false
+      })
 
-    // Update ScrollTrigger on every Lenis tick
-    lenisRef.current.on('scroll', ScrollTrigger.update)
+      // Update ScrollTrigger on every Lenis tick
+      lenisRef.current.on('scroll', ScrollTrigger.update)
 
-    // Sync Lenis with GSAP ticker
-    rafFunctionRef.current = (time) => {
-      lenisRef.current.raf(time * 1000)
-    }
-    gsap.ticker.add(rafFunctionRef.current)
+      // Sync Lenis with GSAP ticker
+      rafFunctionRef.current = (time) => {
+        lenisRef.current.raf(time * 1000)
+      }
+      gsap.ticker.add(rafFunctionRef.current)
 
-    // Disable lag smoothing for more accurate sync
-    gsap.ticker.lagSmoothing(0)
+      // Disable lag smoothing for more accurate sync
+      gsap.ticker.lagSmoothing(0)
 
-    // Advanced scroll animations for sections
-    const sections = document.querySelectorAll('.content section')
+      // Advanced scroll animations for sections with "coming and going" flow
+      const sections = document.querySelectorAll('.content section')
 
-    sections.forEach((section, index) => {
-      const sectionContent = section.querySelector('.section-content')
-      const heading = section.querySelector('h1, h2')
-      const paragraphs = section.querySelectorAll('p')
-      const listItems = section.querySelectorAll('li')
-      const cards = section.querySelectorAll('.experience-item, .stat-card')
-      const isProjectSection = section.querySelector('.project')
+      sections.forEach((section, index) => {
+        const sectionContent = section.querySelector('.section-content')
+        const heading = section.querySelector('h1, h2')
+        const paragraphs = section.querySelectorAll('p')
+        const listItems = section.querySelectorAll('li')
+        const cards = section.querySelectorAll('.experience-item, .stat-card')
+        const isProjectSection = section.querySelector('.project')
 
-      // Create timeline for this section
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 80%',
-          end: 'bottom 20%',
-          toggleActions: 'play reverse play reverse',
-          onEnter: () => {
-            // Activate particle mode for projects section
-            if (isProjectSection) {
-              setParticleMode(1)
-            }
-          },
-          onLeave: () => {
-            if (isProjectSection) {
-              setParticleMode(0)
-            }
-          },
-          onEnterBack: () => {
-            if (isProjectSection) {
-              setParticleMode(1)
-            }
-          },
-          onLeaveBack: () => {
-            if (isProjectSection) {
-              setParticleMode(0)
+        // Create timeline for this section with proper reversing
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 80%',
+            end: 'bottom 20%',
+            toggleActions: 'play reverse play reverse',
+            onEnter: () => {
+              // Activate particle mode for projects section
+              if (isProjectSection) {
+                setParticleMode(1)
+              }
+            },
+            onLeave: () => {
+              if (isProjectSection) {
+                setParticleMode(0)
+              }
+            },
+            onEnterBack: () => {
+              if (isProjectSection) {
+                setParticleMode(1)
+              }
+            },
+            onLeaveBack: () => {
+              if (isProjectSection) {
+                setParticleMode(0)
+              }
             }
           }
+        })
+
+        // Section entrance animation
+        tl.fromTo(
+          sectionContent,
+          { 
+            opacity: 0,
+            y: 60
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'power3.out'
+          },
+          0
+        )
+
+        // Heading character reveal animation
+        if (heading) {
+          const chars = splitTextIntoChars(heading)
+          tl.fromTo(
+            chars,
+            {
+              opacity: 0,
+              y: 30,
+              rotateX: -90
+            },
+            {
+              opacity: 1,
+              y: 0,
+              rotateX: 0,
+              duration: 0.6,
+              stagger: 0.02,
+              ease: 'back.out(1.7)'
+            },
+            0.1
+          )
+        }
+
+        // Paragraphs word reveal
+        paragraphs.forEach((p, pIndex) => {
+          const words = splitTextIntoWords(p)
+          tl.fromTo(
+            words,
+            {
+              opacity: 0,
+              y: 20,
+              filter: 'blur(4px)'
+            },
+            {
+              opacity: 1,
+              y: 0,
+              filter: 'blur(0px)',
+              duration: 0.5,
+              stagger: 0.03,
+              ease: 'power2.out'
+            },
+            0.3 + pIndex * 0.1
+          )
+        })
+
+        // List items stagger
+        if (listItems.length > 0) {
+          tl.fromTo(
+            listItems,
+            {
+              opacity: 0,
+              x: -30,
+              filter: 'blur(3px)'
+            },
+            {
+              opacity: 1,
+              x: 0,
+              filter: 'blur(0px)',
+              duration: 0.5,
+              stagger: 0.05,
+              ease: 'power2.out'
+            },
+            0.4
+          )
+        }
+
+        // Cards stagger
+        if (cards.length > 0) {
+          tl.fromTo(
+            cards,
+            {
+              opacity: 0,
+              y: 40,
+              scale: 0.95
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.6,
+              stagger: 0.1,
+              ease: 'power3.out'
+            },
+            0.3
+          )
         }
       })
 
-      // Section fade in
-      tl.fromTo(
-        sectionContent,
-        { 
-          opacity: 0,
-          y: 60
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: 'power3.out'
-        },
-        0
-      )
-
-      // Heading character reveal animation
-      if (heading) {
-        const chars = splitTextIntoChars(heading)
-        tl.fromTo(
-          chars,
-          {
-            opacity: 0,
-            y: 30,
-            rotateX: -90
-          },
-          {
-            opacity: 1,
-            y: 0,
-            rotateX: 0,
-            duration: 0.6,
-            stagger: 0.02,
-            ease: 'back.out(1.7)'
-          },
-          0.1
-        )
+      // Initialize quick setters once mesh is available (outside the scroll loop)
+      const initQuickSetters = () => {
+        if (meshRef.current && !quickSettersRef.current.initialized) {
+          quickSettersRef.current.rotationY = gsap.quickSetter(meshRef.current.rotation, 'y', 'number')
+          quickSettersRef.current.rotationX = gsap.quickSetter(meshRef.current.rotation, 'x', 'number')
+          quickSettersRef.current.positionY = gsap.quickSetter(meshRef.current.position, 'y', 'number')
+          quickSettersRef.current.positionZ = gsap.quickSetter(meshRef.current.position, 'z', 'number')
+          quickSettersRef.current.initialized = true
+        }
       }
+      
+      // Try to initialize immediately if mesh exists
+      initQuickSetters()
 
-      // Paragraphs word reveal
-      paragraphs.forEach((p, pIndex) => {
-        const words = splitTextIntoWords(p)
-        tl.fromTo(
-          words,
-          {
-            opacity: 0,
-            y: 20,
-            filter: 'blur(4px)'
-          },
-          {
-            opacity: 1,
-            y: 0,
-            filter: 'blur(0px)',
-            duration: 0.5,
-            stagger: 0.03,
-            ease: 'power2.out'
-          },
-          0.3 + pIndex * 0.1
-        )
-      })
-
-      // List items stagger
-      if (listItems.length > 0) {
-        tl.fromTo(
-          listItems,
-          {
-            opacity: 0,
-            x: -30,
-            filter: 'blur(3px)'
-          },
-          {
-            opacity: 1,
-            x: 0,
-            filter: 'blur(0px)',
-            duration: 0.5,
-            stagger: 0.05,
-            ease: 'power2.out'
-          },
-          0.4
-        )
-      }
-
-      // Cards stagger
-      if (cards.length > 0) {
-        tl.fromTo(
-          cards,
-          {
-            opacity: 0,
-            y: 40,
-            scale: 0.95
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'power3.out'
-          },
-          0.3
-        )
-      }
-
-      // Exit animation - scroll out effect
+      // Animate mesh rotation and position based on scroll
       ScrollTrigger.create({
-        trigger: section,
-        start: 'bottom 30%',
-        end: 'bottom -20%',
+        trigger: document.body,
+        start: 'top top',
+        end: 'bottom bottom',
         scrub: 1,
         onUpdate: (self) => {
           const progress = self.progress
           
-          // Exit animation - slide up and fade out
-          gsap.to(sectionContent, {
-            y: -30 * progress,
-            opacity: 1 - progress * 0.3,
-            filter: `blur(${progress * 2}px)`,
-            duration: 0.1,
-            ease: 'none'
-          })
+          // Update scroll ref for shader
+          scrollRef.current = progress
+          
+          // Calculate target values
+          const rotationY = progress * Math.PI * 2
+          const rotationX = Math.sin(progress * Math.PI) * 0.3
+          const positionY = Math.sin(progress * Math.PI * 2) * 0.5
+          const positionZ = progress * 2
+          
+          // Apply using quick setters if initialized
+          if (quickSettersRef.current.initialized) {
+            quickSettersRef.current.rotationY(rotationY)
+            quickSettersRef.current.rotationX(rotationX)
+            quickSettersRef.current.positionY(positionY)
+            quickSettersRef.current.positionZ(positionZ)
+          } else {
+            // Fallback: try to initialize if not done yet
+            initQuickSetters()
+          }
         }
       })
-    })
 
-    // Create a proxy object for 3D mesh animation
-    const proxy = { rotationY: 0, rotationX: 0, positionY: 0, positionZ: 0 }
+      // Pills animation
+      const pills = document.querySelectorAll('.pill')
+      pills.forEach((pill, i) => {
+        gsap.fromTo(
+          pill,
+          { opacity: 0, scale: 0.8, y: 20 },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.5,
+            delay: 0.5 + i * 0.1,
+            ease: 'back.out(1.7)'
+          }
+        )
+      })
 
-    // Animate mesh rotation and position based on scroll
-    ScrollTrigger.create({
-      trigger: document.body,
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 1,
-      onUpdate: (self) => {
-        const progress = self.progress
-        
-        // Update scroll ref for shader
-        scrollRef.current = progress
-        
-        // Smooth rotation
-        proxy.rotationY = progress * Math.PI * 2
-        proxy.rotationX = Math.sin(progress * Math.PI) * 0.3
-        
-        // Smooth position changes - mesh moves from Z=0 to Z=2 (camera at Z=5)
-        proxy.positionY = Math.sin(progress * Math.PI * 2) * 0.5
-        proxy.positionZ = progress * 2
-        
-        // Apply to mesh if available
-        if (meshRef.current) {
-          gsap.to(meshRef.current.rotation, {
-            y: proxy.rotationY,
-            x: proxy.rotationX,
-            duration: 0.1,
-            ease: 'none'
-          })
-          
-          gsap.to(meshRef.current.position, {
-            y: proxy.positionY,
-            z: proxy.positionZ,
-            duration: 0.1,
-            ease: 'none'
-          })
-        }
-      }
-    })
-
-    // Pills animation
-    const pills = document.querySelectorAll('.pill')
-    pills.forEach((pill, i) => {
-      gsap.fromTo(
-        pill,
-        { opacity: 0, scale: 0.8, y: 20 },
-        {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.5,
-          delay: 0.5 + i * 0.1,
-          ease: 'back.out(1.7)'
-        }
-      )
-    })
-
-    // Contact chips animation
-    const chips = document.querySelectorAll('.chip')
-    chips.forEach((chip, i) => {
-      gsap.fromTo(
-        chip,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.4,
-          delay: 0.8 + i * 0.08,
-          ease: 'power2.out'
-        }
-      )
-    })
+      // Contact chips animation
+      const chips = document.querySelectorAll('.chip')
+      chips.forEach((chip, i) => {
+        gsap.fromTo(
+          chip,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            delay: 0.8 + i * 0.08,
+            ease: 'power2.out'
+          }
+        )
+      })
+    }) // End of gsap.context
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+      // Reset quickSetters
+      quickSettersRef.current = {
+        rotationY: null,
+        rotationX: null,
+        positionY: null,
+        positionZ: null,
+        initialized: false
+      }
+      
+      // Clean up GSAP context (removes all animations created within it)
+      ctx.revert()
+      
+      // Clean up Lenis
       if (lenisRef.current) {
         lenisRef.current.destroy()
       }
+      
+      // Clean up GSAP ticker
       if (rafFunctionRef.current) {
         gsap.ticker.remove(rafFunctionRef.current)
       }
