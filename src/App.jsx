@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import Lenis from 'lenis'
 import Scene from './components/Scene'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -10,6 +11,25 @@ function App() {
   const [scrollProgress, setScrollProgress] = useState(0)
 
   useEffect(() => {
+    // Initialize Lenis smooth scroll
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smooth: true,
+      smoothTouch: false
+    })
+
+    // Update ScrollTrigger on every Lenis tick
+    lenis.on('scroll', ScrollTrigger.update)
+
+    // Sync Lenis with GSAP ticker
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000)
+    })
+
+    // Disable lag smoothing for more accurate sync
+    gsap.ticker.lagSmoothing(0)
+
     // Track scroll progress
     const handleScroll = () => {
       const scrolled = window.scrollY
@@ -88,6 +108,8 @@ function App() {
     return () => {
       window.removeEventListener('scroll', handleScroll)
       ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+      lenis.destroy()
+      gsap.ticker.remove(lenis.raf)
     }
   }, [])
 

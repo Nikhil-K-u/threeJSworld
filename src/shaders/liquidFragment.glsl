@@ -17,10 +17,24 @@ void main() {
   vec3 color2 = mix(uColor2, uColor3, mixValue2);
   vec3 finalColor = mix(color1, color2, sin(uTime * 0.3) * 0.5 + 0.5);
   
-  // Add fresnel-like edge glow based on surface normal
-  vec3 normal = normalize(cross(dFdx(vPosition), dFdy(vPosition)));
-  float edgeGlow = abs(normal.z);
-  finalColor += (1.0 - edgeGlow) * 0.3;
+  // Calculate view direction for proper Fresnel
+  vec3 viewDirection = normalize(cameraPosition - vPosition);
+  
+  // Proper Fresnel equation for iridescent 'oil slick' effect
+  float fresnel = pow(1.0 - dot(normalize(vNormal), viewDirection), 3.0);
+  
+  // Create iridescent colors based on Fresnel at edges
+  vec3 iridescent = vec3(
+    sin(fresnel * 6.28 + uTime * 0.5) * 0.5 + 0.5,
+    sin(fresnel * 6.28 + uTime * 0.7 + 2.0) * 0.5 + 0.5,
+    sin(fresnel * 6.28 + uTime * 0.3 + 4.0) * 0.5 + 0.5
+  );
+  
+  // Apply iridescent effect at edges
+  finalColor = mix(finalColor, iridescent, fresnel * 0.6);
+  
+  // Add edge glow with Fresnel
+  finalColor += fresnel * 0.4;
   
   // Add subtle pulsing
   finalColor *= 0.8 + sin(uTime) * 0.2;

@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
+import { EffectComposer, Bloom, Noise } from '@react-three/postprocessing'
 import LiquidMesh from './LiquidMesh'
 import Loader from './Loader'
 import ResponsiveCamera from './ResponsiveCamera'
@@ -27,6 +28,17 @@ export default function Scene({ scrollProgress, meshRef }) {
       <Suspense fallback={<Loader />}>
         <LiquidMesh scrollProgress={scrollProgress} ref={meshRef} />
       </Suspense>
+
+      {/* Post-processing effects */}
+      <EffectComposer>
+        <Bloom 
+          mipmapBlur 
+          luminanceThreshold={1} 
+          intensity={1.5}
+          levels={9}
+        />
+        <Noise opacity={0.05} />
+      </EffectComposer>
     </Canvas>
   )
 }
