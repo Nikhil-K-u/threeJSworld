@@ -7,14 +7,7 @@ import Effects from './Effects'
 
 export default function Scene({ scrollRef, meshRef, particleMode }) {
   return (
-    <div className="canvas-container" style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100vh',
-      zIndex: 0
-    }}>
+    <div className="canvas-container">
       <Canvas
         gl={{
           antialias: true,
