@@ -20,8 +20,12 @@ function splitTextIntoChars(element) {
     const span = document.createElement('span')
     span.textContent = char === ' ' ? NON_BREAKING_SPACE : char
     span.style.display = 'inline-block'
-    // Start visible - will be animated by GSAP from this state
-    span.style.opacity = '1'
+    span.style.opacity = '0'
+    // Inherit the gradient text from parent h1
+    span.style.background = 'inherit'
+    span.style.webkitBackgroundClip = 'text'
+    span.style.backgroundClip = 'text'
+    span.style.webkitTextFillColor = 'transparent'
     span.className = 'split-char'
     element.appendChild(span)
     return span
@@ -38,8 +42,7 @@ function splitTextIntoWords(element) {
     const span = document.createElement('span')
     span.textContent = word
     span.style.display = 'inline-block'
-    // Start visible - will be animated by GSAP from this state
-    span.style.opacity = '1'
+    span.style.opacity = '0'
     span.className = 'split-word'
     if (i < words.length - 1) {
       const space = document.createElement('span')
